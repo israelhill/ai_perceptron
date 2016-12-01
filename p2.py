@@ -65,6 +65,13 @@ def classify(x, y, boundary_formula):
         return 'versicolor'
 
 
+def new_classify(x1, x2, boundary_formula):
+    val = boundary_formula(x1, x2)
+    if val >= 0:
+        return 'versicolor'
+    else:
+        return 'virginica'
+
 def mse(data, boundary, classes):
     setosa_data, versicolor_data, virginica_data = data
     # print(setosa_data)
@@ -107,8 +114,10 @@ def mse(data, boundary, classes):
 
 if __name__ == "__main__":
     data = read_csv()
-    # simple_threshold(5.1, 2)
+    print(new_classify(5.1, 1.8, lambda x1, x2: x1*-0.95 + x2*-0.95 + 6.55))
+
+    # 2B choose good and bad function and plot
     # mse = mse(data, lambda x: -0.68*x+5, ['versicolor', 'virginica'])
-    mse = mse(data, lambda x: -0.95 * x + 6.55, ['versicolor', 'virginica'])
-    print(mse)
+    # mse = mse(data, lambda x: -0.95 * x + 6.55, ['versicolor', 'virginica'])
+    # print(mse)
     # plot_petal_length_width(lambda x: -0.68*x+5)
