@@ -58,12 +58,10 @@ def plot_petal_length_width(formula):
     plt.show()
 
 
-def simple_threshold(x, y, boundary_formula):
+def classify(x, y, boundary_formula):
     if boundary_formula(x) <= y:
-        print('virginica')
         return 'virginica'
     else:
-        print('versicolor')
         return 'versicolor'
 
 
@@ -90,26 +88,27 @@ def mse(data, boundary, classes):
     else:
         data2 = setosa_data
 
-    error = 0
+    sum = 0
     for i in range(0, len(data1['petal_length'])-1):
-        print(data1['petal_length'][i])
-        print(data1['petal_width'][i])
-        if simple_threshold(float(data1['petal_length'][i]), float(data1['petal_width'][i])) != class1:
-            error += 1
+        if classify(float(data1['petal_length'][i]), float(data1['petal_width'][i]), boundary) == class1:
+            val1 = 1
         else:
-            error += 0
+            val1 = -1
+        sum += math.pow(val1 - 1, 2)
 
     for i in range(0, len(data2['petal_length'])-1):
-        if simple_threshold(float(data2['petal_length'][i]), float(data2['petal_width'][i])) != class2:
-            error += 1
+        if classify(float(data2['petal_length'][i]), float(data2['petal_width'][i]), boundary) == class2:
+            val2 = 1
         else:
-            error += 0
+            val2 = -1
+        sum += math.pow(val2 - 1, 2)
 
-    return float(error)/(len(data1['petal_length']) + len(data2['petal_length']))*4
+    return float(sum)/(len(data1['petal_length']) + len(data2['petal_length']))
 
 if __name__ == "__main__":
     data = read_csv()
     # simple_threshold(5.1, 2)
-    # mse = mse(data, 1, ['versicolor', 'virginica'])
-    # print(mse)
-    plot_petal_length_width(lambda x: -0.68*x+5)
+    # mse = mse(data, lambda x: -0.68*x+5, ['versicolor', 'virginica'])
+    mse = mse(data, lambda x: -0.95 * x + 6.55, ['versicolor', 'virginica'])
+    print(mse)
+    # plot_petal_length_width(lambda x: -0.68*x+5)
