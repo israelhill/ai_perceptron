@@ -184,30 +184,18 @@ def plot_extra_credit(weights, centers):
 
 def plot_mse(data_points, weights, step_size, classes):
     iterations = 1000
-    # x = []
     x = range(0, 10)
     y = []
-    count = 0
-    last_y = (2**63) - 1
     for i in range(0, iterations):
         weights[0] -= update_w(weights, step_size, data_points, classes, 0)
         weights[1] -= update_w(weights, step_size, data_points, classes, 1)
         weights[2] -= update_w(weights, step_size, data_points, classes, 2)
         # print('w0: ' + str(weights[0]) + ' | ' + 'w1: ' + str(weights[1]) + ' | ' + 'w2: ' + str(weights[2]))
         error = (mse(data_points, weights, classes))
-        # if i % 10 == 0 and error < last_y:
-        #     y.append(error)
-        #     x.append(count)
-        #     count += 1
-        #     last_y = error
         if i % 100 == 0:
             y.append(error)
-            last_y = error
-    print(len(y))
     plt.plot(x, y)
     plt.show()
-
-
 
 
 if __name__ == "__main__":
