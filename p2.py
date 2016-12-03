@@ -96,6 +96,19 @@ def classify(x1, x2, boundary_formula):
         return 'versicolor', val
 
 
+def circle_classifier(x1, x2, weights, centers, formula):
+    w0 = weights[0]
+    w1 = weights[1]
+    w2 = weights[2]
+    c0 = centers[0]
+    c1 = centers[1]
+    val = formula(x1, x2, w0, w1, w2, c0, c1)
+    if val >= 0:
+        return 'virginica', val
+    else:
+        return 'versicolor', val
+
+
 def mse(data_points, weights, classes):
     total = 0
     flower_data = np.array(data_points).astype(float)
