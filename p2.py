@@ -68,18 +68,16 @@ def get_data():
     return final_data, classes
 
 
-def plot_petal_length_width(weights, equation):
-    plt.title('Iris Petal length x width')
+def plot_petal_length_width(weights, equation, title):
+    plt.title(title)
     plt.xlabel('Petal Length')
     plt.ylabel('Petal Width')
     axes = plt.gca()
     axes.set_xlim([0, 8])
     axes.set_ylim([0, 3])
-    # plt.scatter(setosa['petal_length'], setosa['petal_width'])
     plt.scatter(versicolor['petal_length'], versicolor['petal_width'], c='red')
     plt.scatter(virginica['petal_length'], virginica['petal_width'], c='b', marker='+')
     plt.legend(['Versicolor', 'Virginica'], loc='upper left')
-
     x = np.arange(100)
     y = []
     for i in range(0, 100):
@@ -104,11 +102,13 @@ def circle_classifier(x1, x2, weights, centers, formula):
     c1 = centers[1]
     val = formula(x1, x2, w0, w1, w2, c0, c1)
     if val >= 0:
+        print ('virginica')
         return 'virginica', val
     else:
+        print('versicolor')
         return 'versicolor', val
 
-
+# DIVIDE BY N
 def mse(data_points, weights, classes):
     total = 0
     flower_data = np.array(data_points).astype(float)
@@ -116,7 +116,7 @@ def mse(data_points, weights, classes):
         dot_product = weights[0] + np.dot(weights[1:], flower_data[i])
         sq_difference = math.pow((classify_prediction(dot_product) - classes[i]), 2)
         total += sq_difference
-    return total
+    return total/(2*len(data))
 
 
 def update_w(old_weights, step_size, data_points, data_point_class, dimension):
@@ -139,11 +139,22 @@ def update_w(old_weights, step_size, data_points, data_point_class, dimension):
 
 def g_descent(iterations, weights, step_size, data_points, classes):
     for i in range(0, iterations):
-        weights[0] -= update_w(weights, step_size, data_points, classes, 0)
-        weights[1] -= update_w(weights, step_size, data_points, classes, 1)
-        weights[2] -= update_w(weights, step_size, data_points, classes, 2)
-        # print('w0: ' + str(weights[0]) + ' | ' + 'w1: ' + str(weights[1]) + ' | ' + 'w2: ' + str(weights[2]))
-        # print(mse(data_points, weights, classes))
+        old_w = weights
+        weights[0] -= update_w(old_w, step_size, data_points, classes, 0)
+        weights[1] -= update_w(old_w, step_size, data_points, classes, 1)
+        weights[2] -= update_w(old_w, step_size, data_points, classes, 2)
+        print('w0: ' + str(weights[0]) + ' | ' + 'w1: ' + str(weights[1]) + ' | ' + 'w2: ' + str(weights[2]))
+        print(mse(data_points, weights, classes))
+
+
+def summed_gradient_plot(weights, step_size, data_points, classes):
+    plot_petal_length_width(weights, lambda w0, w1, w2, x: -(w1 * x + w0) / w2, 'Original Decision Boundary')
+    old_w = weights
+    weights[0] -= update_w(old_w, step_size, data_points, classes, 0)
+    weights[1] -= update_w(old_w, step_size, data_points, classes, 1)
+    weights[2] -= update_w(old_w, step_size, data_points, classes, 2)
+    plot_petal_length_width(weights,
+                            lambda w0, w1, w2, x: -(w1 * x + w0) / w2, 'Decision Boundary after Summed Gradient')
 
 
 def classify_prediction(val):
@@ -152,11 +163,6 @@ def classify_prediction(val):
         return 1
     else:
         return -1
-
-# def make_summed_gradient_plot(data_points, weights):
-#     updated_weights = []
-#     for i in range(0, 100):
-#         for x in range(0, len(data_points)):
 
 
 def plot_extra_credit(weights, centers):
@@ -187,9 +193,10 @@ def plot_mse(data_points, weights, step_size, classes):
     x = range(0, 10)
     y = []
     for i in range(0, iterations):
-        weights[0] -= update_w(weights, step_size, data_points, classes, 0)
-        weights[1] -= update_w(weights, step_size, data_points, classes, 1)
-        weights[2] -= update_w(weights, step_size, data_points, classes, 2)
+        old_w = weights
+        weights[0] -= update_w(old_w, step_size, data_points, classes, 0)
+        weights[1] -= update_w(old_w, step_size, data_points, classes, 1)
+        weights[2] -= update_w(old_w, step_size, data_points, classes, 2)
         # print('w0: ' + str(weights[0]) + ' | ' + 'w1: ' + str(weights[1]) + ' | ' + 'w2: ' + str(weights[2]))
         error = (mse(data_points, weights, classes))
         if i % 100 == 0:
@@ -198,24 +205,78 @@ def plot_mse(data_points, weights, step_size, classes):
     plt.show()
 
 
+def plot_3c(iterations, weights, step_size, data_points, classes):
+    x_error = range(0, 10)
+    y_error = []
+    initial_error = (mse(data_points, weights, classes))
+    for i in range(0, iterations):
+        old_w = weights
+        weights[0] -= update_w(old_w, step_size, data_points, classes, 0)
+        weights[1] -= update_w(old_w, step_size, data_points, classes, 1)
+        weights[2] -= update_w(old_w, step_size, data_points, classes, 2)
+        error = (mse(data_points, weights, classes))
+        if i % 100 == 0:
+            y_error.append(error)
+
+    plt.xlabel('Petal Length')
+    plt.ylabel('Petal Width')
+    axes = plt.gca()
+    axes.set_xlim([0, 10])
+    axes.set_ylim([0, 1])
+
+    plt.title('Learning curve: Initial')
+    plt.plot(0, initial_error)
+    plt.show()
+
+    plt.title('Learning curve: Middle')
+    axes = plt.gca()
+    axes.set_xlim([0, 10])
+    axes.set_ylim([0, 1])
+    plt.plot(x_error[0:5], y_error[0:5])
+    plt.show()
+
+    plt.title('Learning curve: Final')
+    axes = plt.gca()
+    axes.set_xlim([0, 10])
+    axes.set_ylim([0, 1])
+    plt.plot(x_error[0:10], y_error[0:10])
+    plt.show()
+
+
 if __name__ == "__main__":
     data2 = read_csv()
 
     data, classes = get_data()
     weights = [0, 10, 10]
+    # weights = [-14.36, 1.562, 4.8]
 
-    plot_mse(data, weights, 0.01, classes)
+    # summed_gradient_plot(weights, 0.01, data, classes)
+    # plot_mse(data, weights, 0.001, classes)
 
     # 2B choose good and bad function and plot the boundary line over the data
     # mse = mse(data, [0, -0.95, -0.95], classes)
     # print(mse)
     # plot_weights = [-15.36, 1.562, 4.8]
-    # plot_petal_length_width(plot_weights, lambda w0, w1, w2, x: -(w1 * x + w0) / w2)
+    # plot_weights = [-15, 2, 5]
+    # plot_petal_length_width(plot_weights,
+    # lambda w0, w1, w2, x: -(w1 * x + w0) / w2, 'Hand Selected Decision Boundary')
     # g_descent(10000, weights, 0.01, data, classes)
     # print(classify(8, 5, lambda x1, x2: (-0.68*x1 + -0.68*x2) + 8.6))
+    # plot_mse(data, weights, 0.01, classes)
 
     # -15.28, 1.56, 4.87
     # centers: 4.0, 1.0
     # circle weights: -0.6, 0.5, 0.5
     # lambda x1, x2, w0, w1, w2, c0, c1: w1 * ((x1 - c0) ** 2) + w2 * ((x2 - c1) ** 2) + w0
     # plot_extra_credit([-0.6, 0.5, 0.5], [4.0, 1.0])
+    # circle_classifier(6, 2, [-0.6, 0.5, 0.5], [4.0, 1.0],
+    # lambda x1, x2, w0, w1, w2, c0, c1: w1 * ((x1 - c0) ** 2) + w2 * ((x2 - c1) ** 2) + w0)
+
+    # 1C: use decision boundary from part 1b to classify a few points
+    # 1D: Extra credit... use the circle decision boudary to classify a few points
+    # 2B: plot the mse for two decision boundaries (good and bad)
+    # 2C: mathematical derivation of the gradient
+    # 2D: Show gradient in scalar and vector form
+    # 2E: Summed gradient... show plot of decision boudary before and after
+    # 3C: Show learning curve and decision boundary for beginning, middle, and end
+    # plot_3c(1000, weights, 0.001, data, classes)
